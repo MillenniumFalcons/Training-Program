@@ -1,4 +1,5 @@
 # Step 3: Turn the Wheel 90 Degrees
+*Timeline ~1 week.*
 
 Now it's time to learn about PID control. In this step, you'll program one of the minibot's wheels to turn to a target position. You'll implement it **twice** — first using WPILib's `PIDController` class to understand how PID works, then using the SparkMax's onboard PID controller, which is how it's done in practice.
 

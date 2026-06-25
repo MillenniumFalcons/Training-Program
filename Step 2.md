@@ -1,4 +1,5 @@
 # Step 2: Minibot Drive
+*Timeline ~2 weeks.*
 
 > **Before you start:** Make sure you've completed Step 1. Follow this guide: [Intro to WPILib](Supplementals/Intro-to-Wpilib.md) to install WPILib VSCode and create your mini-bot project. If you get stuck at any point, you can reference the finished mini-bot project [here](https://github.com/ChrisC12345/mini-bot) — but try to figure it out yourself first. 
 
@@ -63,7 +64,7 @@ If VS Code underlines the interface name in red, hover over it and select **"Add
 
 ### 2.2 — Add `PeriodicIO`
 
-Inside your `Drivetrain` class, create a `public static` inner class called `PeriodicIO`. This is a simple container that holds the values you want to send to each motor each loop. Give it three fields:
+Inside your `Drivetrain` class, create a `public static` inner class called `PeriodicIO`. This is a simple container that holds the values you want to send to each motor each loop. IO stands for Input/Output. Give it three fields:
 - `double leftOutput` — speed for the left side (-1.0 to 1.0)
 - `double rightOutput` — speed for the right side (-1.0 to 1.0)
 - `ControlType controlType` — tells the SparkMax how to interpret the output values. Default this to `ControlType.kDutyCycle`, which means percentage of full power.
@@ -159,7 +160,8 @@ Inside the `RobotContainer` constructor:
 
 2. Call `drivetrain.setDefaultCommand(...)` and pass in `drivetrainCommands.drive(...)`. A **default command** runs whenever nothing else is using the subsystem — since driving is the default behavior, this is where it belongs.
 
-3. For the `DoubleSupplier` arguments, pass `mainController::getLeftStickY` for speed and `mainController::getRightStickX` for rotation. The `::` syntax is a **method reference** — shorthand for `() -> mainController.getLeftStickY()`. It creates a `DoubleSupplier` that reads the joystick live each loop.
+3. For the `DoubleSupplier` arguments, pass `mainController::getLeftStickY` for speed and `mainController::getRightStickX` for rotation. The `::` syntax is a **method reference** — shorthand for `() -> mainController.getLeftStickY()`. It creates a `DoubleSupplier` that reads the joystick live each loop. 
+Learn about java lambdas here: https://www.w3schools.com/java/java_lambda.asp.
 
 ---
 

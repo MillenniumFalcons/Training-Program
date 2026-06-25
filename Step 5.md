@@ -1,42 +1,225 @@
-# Step 5: Swerve
+# Step 5: Vision
+*Timeline ~2 week.*
 
-**Swerve Background:**
-Swerve is the type of drivetrain where each wheel is free to rotate independently, which allows you to spin and drive at the same time. This is the drivetrain we use for most of our robots.
+> This step is a little more advanced. If you want to start programming the actual robot, skip to Step 6; it is more relevant to the work you'll actually be doing during the season.
 
+In Step 4 you set up odometry, which tracks position by counting wheel rotations. The problem is that any wheel slip causes the estimate to drift, and over a full match that error adds up fast.
 
->[!NOTE]
->You should [create a new project](Supplementals/Intro-to-Wpilib.md#project-creation) for this exersize, and install the CTRE Phoenix vendor library
+In this step, you'll add **AprilTag vision** using the Limelight to get direct position measurements from the field, then fuse them with your odometry using a Kalman Filter to get a pose estimate that's both continuous and accurate.
 
-## CTRE Swerve API:
-To actually run our swerve drivetrain, we’ll use the api that CTRE provides in their docs. However, you should learn how it works [under the hood](Supplementals/How%20to%20Structure%20a%20Custom%20Swerve%20Drivetrain.md) at some point, even if you don’t want to right now.
+> If you get stuck, ask a lead. There are no dumb questions.
 
->[!IMPORTANT]
->Before you begin, please [read the CTRE Swerve API docs.](https://v6.docs.ctr-electronics.com/en/stable/docs/api-reference/mechanisms/swerve/swerve-overview.html) 
->For now, you don't need to worry much about actually making things, but make sure you know the theory and what everything does.
-## Configuring a swerve drive
-Thankfully, we don't acutally have to make the swerve drivetrain a swerve module configs manually. We don't even have to tune it that much!
+---
 
-All we have to do is run the Phoenix Tuner swerve builder routine. (read through all the subtabs in [this page](https://v6.docs.ctr-electronics.com/en/stable/docs/tuner/tuner-swerve/index.html), or just follow the directions in the phoenix tuner x app)
+## Limelight Quick Start
 
-once you finish, click the "only generate TunerConstants" button, and save the file to the constants folder in you robot project
+The minibot has a **Limelight** — a camera with an onboard computer that handles AprilTag detection and pose math for us.
 
-also, for safety, click the "save as json" button and save the json file somewhere.
-## Running a swerve drive
-1. We’ll start with a drivetrain class (called SwerveDrive) much like the minibot, but this one should extend `TunerSwerveDrivetrain`, created in step 1 
->[!NOTE]
-> the `SwerveDrivetrain` class needs to know what motors and encoders you're using, so your drivetrain class should extend `TunerSwerveDrivetrain` that was generated in `TunerConstants`
-- Keep in mind, the constructor should take all the necessary arguments so you can call the `super()` constructor (a `SwerveDrivetrainConstants` and 4 `SwerveModuleConstants`)
+### Getting the Library
 
-2. The process for setting a swerve drive is similar to the process of setting a TalonFX motor, except the motor is now your drivetrain class
-	1. since your drivetrain class extends `SwerveDrivetrain`, you should be calling `super.setControl()` with a swerve Request parameter
-3. Much like your drivetrain from the mini bot, the way we structure the swerve code is to use an "output" variable, and modify the variable whenever we call the drive function
-	1. instead of a double, we'll use a `SwerveRequest`
-#### Using the `SwerveRequests`
-1. create a new generic swerve request, set it equal to a new idle swerve request `SwerveRequest name = new SwerveRequest.idle()`
-2. then, we create swerve requests for each type of driving we want to do 
-	- eg. one for field relative drive, one for robot relative drive, etc.
-3. when you make your drive function, 
-	1. modify the specific swerve requests for that type of drive (field centric for field relative drive, or robot centric for robot relative drive)
-	2. set the generic control request equal to the specific control request `nameOfGenericRequest = nameOfSpecificRequest`
+The Limelight library is a single file called `LimelightHelpers.java`. Copy it from `team3647/lib/vision` in the most recent robot code repo and drop it into your project's `frc/robot` folder.
 
+> You don't need to install anything — it's just a Java file you include directly.
 
+### Reading a Pose
+
+Call `LimelightHelpers.getBotPose2d_wpiBlue("")` to get the robot's estimated pose in field coordinates (origin = blue alliance corner, which is what WPILib uses internally):
+
+```java
+Pose2d visionPose = LimelightHelpers.getBotPose2d_wpiBlue("");
+```
+
+Log it with AdvantageKit and point the camera at an AprilTag — you should see a pose appear in AdvantageScope.
+
+```java
+Logger.recordOutput("Drivetrian/Vision Pose", visionPose);
+```
+
+Verify this is working before continuing.
+
+---
+
+## Integrating Vision with Odometry
+
+We can't always see AprilTags during a match — robots and field elements will block the view. So we can't rely on vision alone. But we also can't rely on odometry alone because it drifts.
+
+The solution is to **fuse them together**: use odometry as the baseline, and whenever we get a vision pose, use it to nudge the odometry estimate toward the real position.
+
+We do this with a **Kalman Filter**, which WPILib implements in the `DifferentialDrivePoseEstimator` class. It works just like `DifferentialDriveOdometry` from Step 4, but also accepts vision measurements. It weights each source based on how much you tell it to trust it.
+
+### Upgrading to `DifferentialDrivePoseEstimator`
+
+First, add a `DifferentialDriveKinematics` constant to `DrivetrainConstants.java`. This describes your drivetrain's geometry — specifically the **trackwidth**, which is the distance between the center of the left wheels and the center of the right wheels. Measure this on the robot:
+
+```java
+// In DrivetrainConstants.java
+public static final double TRACK_WIDTH_METERS = some number; // measure on your robot
+public static final DifferentialDriveKinematics KINEMATICS =
+    new DifferentialDriveKinematics(TRACK_WIDTH_METERS);
+```
+
+Now replace the `DifferentialDriveOdometry` field in `Drivetrain.java` with a `DifferentialDrivePoseEstimator`. The constructor takes the same arguments as before, with `kinematics` added as the first argument:
+
+```java
+private final DifferentialDrivePoseEstimator poseEstimator = new DifferentialDrivePoseEstimator(
+    DrivetrainConstants.KINEMATICS,
+    getHeading(),
+    0, 0,
+    new Pose2d()
+);
+```
+
+Update `readPeriodicInputs()` to call `update()` on the estimator — the signature is identical to the old odometry call:
+
+```java
+periodicIO.pose = poseEstimator.update(
+    getHeading(),
+    getLeftDistanceMeters(),
+    getRightDistanceMeters()
+);
+```
+
+### Adding Vision Measurements
+
+When you get a vision pose from the Limelight, call `addVisionMeasurement()` on the estimator. This requires three things:
+
+1. **The pose** — the `Pose2d` from `getBotPose2d_wpiBlue`
+2. **The timestamp** — *when* the image was taken, not when you received it. The Limelight takes time to process the image, so you need to subtract that latency out
+3. **Standard deviations** — how much to trust the x, y, and rotation values from vision
+
+#### Timestamp
+
+```java
+// Total latency = pipeline processing time + image capture time (both in ms, convert to seconds)
+double latencySeconds = (LimelightHelpers.getLatency_Pipeline("")
+                       + LimelightHelpers.getLatency_Capture("")) / 1000.0;
+double timestamp = Timer.getFPGATimestamp() - latencySeconds;
+```
+
+> `Timer.getFPGATimestamp()` returns the current time in seconds. Subtracting the latency gives the time the image was actually taken. Getting this right matters — giving the estimator a measurement with the wrong timestamp causes it to apply the correction at the wrong point in the robot's path.
+
+#### Standard Deviations
+
+Standard deviations tell the Kalman filter how much to trust each part of the vision measurement. Lower = more trust, higher = less trust.
+
+- **x and y:** Vision is reasonably accurate here. A value of `0.05` works well as a starting point.
+- **rotation:** We have a gyro, which is far more accurate for heading than vision. Set this very high (e.g. `9999`) to effectively ignore the vision rotation entirely.
+
+```java
+// Trust x/y, ignore vision rotation since we have a gyro
+VecBuilder.fill(0.05, 0.05, 9999)
+```
+
+#### Putting It Together
+
+Add a method to `Drivetrain.java` that takes a vision pose and feeds it to the estimator:
+
+```java
+public void addVisionMeasurement(Pose2d visionPose, double timestamp) {
+    poseEstimator.addVisionMeasurement(
+        visionPose,
+        timestamp,
+        VecBuilder.fill(0.05, 0.05, 9999)
+    );
+}
+```
+
+Then, in `readPeriodicInputs()`, call it alongside your `update()` call:
+
+```java
+Pose2d visionPose = LimelightHelpers.getBotPose2d_wpiBlue("");
+double latencySeconds = (LimelightHelpers.getLatency_Pipeline("")
+                       + LimelightHelpers.getLatency_Capture("")) / 1000.0;
+double timestamp = Timer.getFPGATimestamp() - latencySeconds;
+
+addVisionMeasurement(visionPose, timestamp);
+```
+
+> In AdvantageScope, you should now see your odometry pose slowly drift toward the vision pose when you're looking at a tag. **If it doesn't, ask for help and fix it before continuing.**
+
+---
+
+## Filtering Bad Poses
+
+There's a problem: when the Limelight can't see any tags, `getBotPose2d_wpiBlue` returns `(0, 0, 0)`. If we blindly feed that into the estimator, our pose will get pulled toward the origin of the field — which is obviously wrong.
+
+We need to **filter out bad poses** before passing them to `addVisionMeasurement`.
+
+<img src="Supplementals/images/filtering.png" alt="drawing" width="400" />
+
+Wrap the vision measurement call in checks:
+
+```java
+Pose2d visionPose = LimelightHelpers.getBotPose2d_wpiBlue("");
+
+boolean isZeroPose = visionPose.getX() == 0 && visionPose.getY() == 0;
+boolean isOutsideField = visionPose.getX() < 0 || visionPose.getX() > 16.54
+                      || visionPose.getY() < 0 || visionPose.getY() > 8.21;
+boolean isInTheAir = LimelightHelpers.getBotPose3d_wpiBlue("").getZ() > 0.5;
+
+if (!isZeroPose && !isOutsideField && !isInTheAir) {
+    double latencySeconds = (LimelightHelpers.getLatency_Pipeline("")
+                           + LimelightHelpers.getLatency_Capture("")) / 1000.0;
+    addVisionMeasurement(visionPose, Timer.getFPGATimestamp() - latencySeconds);
+}
+```
+
+The three filters:
+1. **Zero pose** — `(0, 0, 0)` is the default return when no tag is visible
+2. **Field boundary** — the FRC field is 16.54m × 8.21m; anything outside is impossible
+3. **Z-axis check** — if the pose puts the robot in the air, it's wrong
+
+> The field dimensions above are for the 2024 season. Check the game manual for the current year's field size.
+
+In Step 7, you'll see how these filters are structured in our actual robot code. For now, implement them however makes sense to you.
+
+---
+
+## Pose Ambiguity
+
+Even when the filters pass, vision can still return the wrong pose. This is called **ambiguity**.
+
+<img src="https://docs.wpilib.org/en/stable/_images/planar_ambiguity1_base.png" alt="drawing" width="400"/>
+<img src="https://docs.wpilib.org/en/stable/_images/planar_ambiguity1.png" alt="drawing" width="400"/>
+
+A single 2D image of a tag can map to two completely different 3D positions — the tag looks identical from both viewpoints. The system doesn't know which one is right, so it sometimes picks the wrong one. In AdvantageScope this shows up as the vision pose rapidly flipping between two locations.
+
+### Fixing Ambiguity
+
+#### Option 1: Camera Angle (Most Effective)
+
+Mounting cameras at **oblique (angled) positions** relative to the tags — rather than looking straight at them — significantly reduces ambiguity, because the two possible 3D interpretations diverge more when viewed from an angle.
+
+> **Talk to your design team early.** Good communication with designers is critical. If the cameras end up in a bad spot mechanically, there's often little software can do to fix it. This applies to other mechanical decisions too (chain runs, backlash, etc.).
+
+#### Option 2: Multitag / MT1
+
+If two tags are visible in the same frame, the vision system can use both together to resolve ambiguity much more reliably — having two reference points essentially eliminates the ambiguous case.
+
+- On Limelight this is called **MegaTag 1 (MT1)** and is enabled by default
+- On PhotonVision this is called **Multitag** and needs to be enabled in the web UI and in code
+
+#### Option 3: Gyro Correction / MT2
+
+The gyro can be used to choose the correct interpretation when vision is ambiguous. You tell the system "I know I'm facing roughly this direction" and it picks whichever of the two ambiguous poses matches that heading.
+
+- On Limelight this is called **MegaTag 2 (MT2)**
+
+> **Warning:** MT2 produces very stable but potentially very wrong poses if your gyro angle is off. Make sure your gyro is reading correctly before enabling it — a drifted or flipped gyro will confidently lock onto the wrong pose.
+
+---
+
+## Checklist Before Moving On
+
+- [ ] `LimelightHelpers.java` is in your project
+- [ ] Vision pose is logged and appears in AdvantageScope when pointing at a tag
+- [ ] `DifferentialDrivePoseEstimator` replaced `DifferentialDriveOdometry`
+- [ ] Trackwidth constant is measured and added to `DrivetrainConstants`
+- [ ] `update()` is still called every loop
+- [ ] Vision measurements use the latency-corrected timestamp
+- [ ] Zero pose, field boundary, and Z-axis filters are all implemented
+- [ ] Odometry pose visibly corrects toward vision pose when tags are visible
+
+---
+
+**Tell a lead when you're done so they can verify your pose looks correct on the field.**

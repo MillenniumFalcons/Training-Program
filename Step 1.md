@@ -1,5 +1,5 @@
 # Step 1: Learn Java with W3Schools (if not already familiar with Java) 
-*This should take at most 2 weeks.*
+*Timeline ~2 weeks.*
 
 This is a link to [W3Schools](https://www.w3schools.com/java/default.asp) which is course for learning Java. At some point you will need to learn everything from the sections "Java Turorial", "Java Methods", and "Java Classes". 
 
