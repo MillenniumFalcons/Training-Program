@@ -1,5 +1,5 @@
 # Step 5: Vision
-*Timeline ~2 week.*
+*Timeline ~2 weeks.*
 
 > This step is a little more advanced. If you want to start programming the actual robot, skip to Step 6; it is more relevant to the work you'll actually be doing during the season.
 
@@ -8,6 +8,43 @@ In Step 4 you set up odometry, which tracks position by counting wheel rotations
 In this step, you'll add **AprilTag vision** using the Limelight to get direct position measurements from the field, then fuse them with your odometry using a Kalman Filter to get a pose estimate that's both continuous and accurate.
 
 > If you get stuck, ask a lead. There are no dumb questions.
+
+---
+
+## Configuring the Limelight
+
+Before writing any code, you need to set up the Limelight through its web interface.
+
+### Accessing the Web Interface
+
+1. Power on the robot and connect your laptop to the robot's network (either via the radio or a direct ethernet cable)
+2. Open a browser and go to `http://limelight.local:5801`
+   - If that doesn't resolve, try `http://10.36.47.11:5801` (the Limelight's default IP on team 3647's network)
+3. You should see a live camera feed and a settings panel
+
+### Setting Up an AprilTag Pipeline
+
+1. In the left panel, click **Create Pipeline** and select **AprilTag**
+2. Set the **Tag Family** to `36h11` — that's the family used in FRC
+3. Under **Camera**, tune the **exposure** down until the image looks crisp and the background isn't blown out. A darker image with clear tag edges works better than a bright one
+4. Under **AprilTag**, enable **Do Multi-Target Estimation (MegaTag 1)** — this significantly reduces ambiguity when two tags are visible
+
+### Setting the Camera Pose
+
+The Limelight needs to know where it's mounted on the robot to correctly calculate field position. Under the **3D** tab:
+
+- Set the camera's **X, Y, Z** offset from the robot center (in meters or inches, depending on the unit setting)
+- Set the **roll, pitch, yaw** of the camera
+
+> This can be done in code instead with `LimelightHelpers.setCameraPose_RobotSpace()`, which is what the mini-bot does. Either way is fine — just don't set it in both places or they'll conflict.
+
+### Verify It's Working
+
+Point the camera at an AprilTag on the field. You should see:
+- A green box drawn around the tag in the camera feed
+- A **3D pose** appearing in the "Poses" tab
+
+If you don't see a detection, check that the pipeline type is set to AprilTag (not retroreflective or neural), and that the tag family matches.
 
 ---
 

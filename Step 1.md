@@ -3,15 +3,16 @@
 
 This is a link to [W3Schools](https://www.w3schools.com/java/default.asp) which is course for learning Java. At some point you will need to learn everything from the sections "Java Turorial", "Java Methods", and "Java Classes". 
 
-Good news: you don't need to go through all of it. Throughout this curriculum, you should reference the W3Schools whenever you need to use a new concept or are unsure of something. 
+Good news: you don't need to go through all of it.
+This Step will not teach you everything you need to know about Java, it is meant to develop the foundations so you can get started coding. Throughout this training program, if you are unsure of a java concept, you should reference W3Schools, or look it up.
 
-If you already know a similar language like C++ or Python, you can just skim through this in a few minutes and move on to the next step.
+If you already know Java you can skip to Step 2. If you already know a similar language like C++ or Python, this step shouldn't take too long; you can breeze through it and move on to the next step.
 
 ---
 
 ## Part 1: The Basics
 
-### 1 - Intro & Variables
+### 1.1 - Intro & Variables
 Open [W3Schools](https://www.w3schools.com/java/default.asp) and read through the sections starting from Intro all the way through Variables. Then complete the Code Challenge at the end of variables. 
 
 You do not need to read through every line, you can jump around as you desire. The goal is not to memorize all the rules for java, but rather to get a feel for the basics. You should be able to complete the Code Challenge without outside help.
@@ -20,7 +21,7 @@ Once you're done, if you're not bored yet, I recommend going through "Java Data 
 
 If you feel like you haven't gotten the hang of it, play around with java variables here: https://onecompiler.com/java until you're confident. You need to change the tab to I/O on the right side to see what the printed outputs.
 
-### 2 - OOP: Classes & Methods
+### 1.2 - OOP: Classes & Methods
 Skim through all the pages under "Java Methods" then do the Code Challenge. 
 
 Skim through the pages starting from "Java OOP" through "Java this keyword" and do the Challenge.
@@ -34,7 +35,7 @@ You now have a good idea of the basics of Java, so it's time to do a mini projec
 
 You'll build a simple bank account simulator. Use this online compiler to write and run your code: [https://onecompiler.com/java](https://onecompiler.com/java) — it supports multiple files, so keep your classes in separate files. 
 
-If you get stuck at any point, you can reference the [example solution](Supplementals/Bank-Account-Example.md) — but try to get as far as you can on your own first, you should only use this as a last resort! Try not to look at it until you've finished the mini project.
+If you get stuck at any point, you can reference the [example solution](<Supplementals/Example Projects/Bank-Account-Example.md>) — but try to get as far as you can on your own first, you should only use this as a last resort! Try not to look at it until you've finished the mini project.
 
 ### Step 1 — Create a BankAccount class
 
@@ -78,11 +79,7 @@ In your `main` method:
 
 ---
 
-**Once you are done, or if you want to skip this step, come talk to one of the heads about the next steps.**
 
-If none of us are available, your next step is to install WPILIB VS Code. Wpilib VS Code is the editor we use to program robots, and it has a bunch of integrations that make it easier to write and run code for robots. **To get started follow [this guide](Supplementals/Intro-to-Wpilib.md) to install Wpilib and make your first project.**
+**Tell a lead when you're done so they can check your code.**
 
-**Once you have done that, contact one of the leads for next steps.**
-
-If none of us are available, **read through [Wpilib's command based programming guide](https://docs.wpilib.org/en/stable/docs/software/commandbased/index.html) and the [how to make a command guide](Supplementals/How-to-Make-a-Command.md), and get started on step 2.**
-
+You now have the necessary foundations to start coding a robot in Step 2.

@@ -1,7 +1,9 @@
-# Step 6: Coding a Full Robot
+# Step 7: Coding a Full Robot
 
 ## need to knows
+- talon fx subsystem
 - motion magic and motion profiling
+- phoenix tuner
 - subsystem names
 - game info
 - pwf tof sensor, how to use,

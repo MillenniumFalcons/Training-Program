@@ -58,7 +58,7 @@ leftMotor.configure(configLeft, ResetMode.kResetSafeParameters, PersistMode.kPer
 
 In your `subsystems` folder, create a new file called `Drivetrain.java`.
 
-Copy the `PeriodicSubsystem` interface into your `lib` folder from the [mini-bot repo](https://github.com/ChrisC12345/mini-bot/blob/master/src/main/java/team3647/lib/PeriodicSubsystem.java). Your class should `implement PeriodicSubsystem`.
+Copy the `PeriodicSubsystem` interface into your `lib` folder from the [mini-bot repo](https://github.com/ChrisC12345/mini-bot/blob/master/src/main/java/team3647/lib/PeriodicSubsystem.java). Your class should `implement PeriodicSubsystem`. Read the W3Schools page on Interfaces if you don't know what this is.
 
 If VS Code underlines the interface name in red, hover over it and select **"Add unimplemented methods"** — it will generate the method stubs for you.
 

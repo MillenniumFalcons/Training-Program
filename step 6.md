@@ -1,42 +1,153 @@
-# Step 5: Swerve
+# Step 6: Swerve
+*Timeline ~2 weeks.*
 
-**Swerve Background:**
-Swerve is the type of drivetrain where each wheel is free to rotate independently, which allows you to spin and drive at the same time. This is the drivetrain we use for most of our robots.
+**What is swerve?**
+Swerve is a drivetrain where each wheel can rotate independently, allowing the robot to spin and translate simultaneously. It's what we use on most of our competition robots. 
 
+Ask a lead if you're not sure what the swerve is.
 
->[!NOTE]
->You should [create a new project](Supplementals/Intro-to-Wpilib.md#project-creation) for this exersize, and install the CTRE Phoenix vendor library
+> **NOTE:**
+> Create a new project for this exercise and install the CTRE Phoenix 6 vendor library.
 
-## CTRE Swerve API:
-To actually run our swerve drivetrain, we’ll use the api that CTRE provides in their docs. However, you should learn how it works [under the hood](Supplementals/How%20to%20Structure%20a%20Custom%20Swerve%20Drivetrain.md) at some point, even if you don’t want to right now.
+Skim through the file "How to Structure a Custom Swerve Drivetrain.md" to get the basic idea of how swerve works.
 
->[!IMPORTANT]
->Before you begin, please [read the CTRE Swerve API docs.](https://v6.docs.ctr-electronics.com/en/stable/docs/api-reference/mechanisms/swerve/swerve-overview.html) 
->For now, you don't need to worry much about actually making things, but make sure you know the theory and what everything does.
-## Configuring a swerve drive
-Thankfully, we don't acutally have to make the swerve drivetrain a swerve module configs manually. We don't even have to tune it that much!
+There is a sample project in the [Supplementals](Supplementals/Example%20Projects/Sample-Swerve-Code.md) folder. You really should use this only as a last resort, try to figure everything out yourself or ask a lead for help. Do not copy it.
 
-All we have to do is run the Phoenix Tuner swerve builder routine. (read through all the subtabs in [this page](https://v6.docs.ctr-electronics.com/en/stable/docs/tuner/tuner-swerve/index.html), or just follow the directions in the phoenix tuner x app)
+---
 
-once you finish, click the "only generate TunerConstants" button, and save the file to the constants folder in you robot project
+## Part 1: Configure the Drivetrain
 
-also, for safety, click the "save as json" button and save the json file somewhere.
-## Running a swerve drive
-1. We’ll start with a drivetrain class (called SwerveDrive) much like the minibot, but this one should extend `TunerSwerveDrivetrain`, created in step 1 
->[!NOTE]
-> the `SwerveDrivetrain` class needs to know what motors and encoders you're using, so your drivetrain class should extend `TunerSwerveDrivetrain` that was generated in `TunerConstants`
-- Keep in mind, the constructor should take all the necessary arguments so you can call the `super()` constructor (a `SwerveDrivetrainConstants` and 4 `SwerveModuleConstants`)
+We don't manually configure swerve modules — CTRE's Tuner X does it for us.
 
-2. The process for setting a swerve drive is similar to the process of setting a TalonFX motor, except the motor is now your drivetrain class
-	1. since your drivetrain class extends `SwerveDrivetrain`, you should be calling `super.setControl()` with a swerve Request parameter
-3. Much like your drivetrain from the mini bot, the way we structure the swerve code is to use an "output" variable, and modify the variable whenever we call the drive function
-	1. instead of a double, we'll use a `SwerveRequest`
-#### Using the `SwerveRequests`
-1. create a new generic swerve request, set it equal to a new idle swerve request `SwerveRequest name = new SwerveRequest.idle()`
-2. then, we create swerve requests for each type of driving we want to do 
-	- eg. one for field relative drive, one for robot relative drive, etc.
-3. when you make your drive function, 
-	1. modify the specific swerve requests for that type of drive (field centric for field relative drive, or robot centric for robot relative drive)
-	2. set the generic control request equal to the specific control request `nameOfGenericRequest = nameOfSpecificRequest`
+1. Run the **Swerve Project Generator** in Tuner X ([docs](https://v6.docs.ctr-electronics.com/en/stable/docs/tuner/tuner-swerve/index.html))
+2. When done, click **"Only Generate TunerConstants"** and save the file to your `constants/` folder
+3. Also click **"Save as JSON"** and save that file somewhere safe as a backup
 
+The generated `TunerConstants.java` contains all your hardware IDs, gear ratios, PID gains, and a nested class called `TunerSwerveDrivetrain` — a typed wrapper around CTRE's `SwerveDrivetrain`.
 
+---
+
+## Part 2: The SwerveDrive Subsystem
+
+Create `SwerveDrive.java` in `subsystems/`. This class should **extend `TunerConstants.TunerSwerveDrivetrain`** and implement `PeriodicSubsystem`.
+
+> **IMPORTANT:**
+> Read the [CTRE Swerve API overview](https://v6.docs.ctr-electronics.com/en/stable/docs/api-reference/mechanisms/swerve/swerve-overview.html) before writing this class. Focus on how `SwerveDrivetrain`, `SwerveRequest`, and telemetry work.
+
+### PeriodicIO
+
+Add a `PeriodicIO` inner class to hold all your state. At minimum you need:
+- A **master `SwerveRequest`** — this is what gets sent to the drivetrain each loop, initialized as `SwerveRequest.Idle`
+- A **`FieldCentric`** request — for driver-relative driving
+- A **`RobotCentric`** request — for robot-relative driving
+
+```java
+public class PeriodicIO {
+    public SwerveRequest masterRequest = new SwerveRequest.Idle();
+    public SwerveRequest.FieldCentric fieldCentric = new SwerveRequest.FieldCentric();
+    public SwerveRequest.RobotCentric robotCentric = new SwerveRequest.RobotCentric();
+}
+```
+
+### Constructor
+
+The constructor takes a `SwerveDrivetrainConstants` and varargs `SwerveModuleConstants<?, ?, ?>...` and passes them to `super()`. After calling `super()`:
+- Call `registerTelemetry(this::setStates)` to wire up state logging
+- Reset the pose and gyro to zero
+
+```java
+public SwerveDrive(
+        SwerveDrivetrainConstants drivetrainConstants,
+        SwerveModuleConstants<?, ?, ?>... modules) {
+    super(drivetrainConstants, modules);
+    registerTelemetry(this::setStates);
+}
+```
+
+### Telemetry Callback
+
+`registerTelemetry` requires a method that accepts a `SwerveDriveState`. Use it to cache the current module states and pose for logging:
+
+```java
+public void setStates(SwerveDriveState state) {
+    periodicIO.states = state.ModuleStates;
+    periodicIO.target = state.ModuleTargets;
+    periodicIO.pose = state.Pose;
+}
+```
+
+### readPeriodicInputs / writePeriodicOutputs
+
+- `readPeriodicInputs`: log your pose, module states, and module targets with AdvantageKit
+- `writePeriodicOutputs`: send `periodicIO.masterRequest` to the hardware by calling `setControl(periodicIO.masterRequest)`
+
+### Drive Methods
+
+Each drive method modifies the appropriate specific request, then sets `masterRequest` equal to it. `writePeriodicOutputs` sends it to the hardware.
+
+**Field-relative drive** (most common for teleop):
+```java
+public void driveFieldCentric(double vx, double vy, double rotationRate) {
+    periodicIO.fieldCentric
+        .withVelocityX(vx)
+        .withVelocityY(vy)
+        .withRotationalRate(rotationRate);
+    periodicIO.masterRequest = periodicIO.fieldCentric;
+}
+```
+
+**Robot-relative drive**:
+```java
+public void driveRobotCentric(double vx, double vy, double rotationRate) {
+    periodicIO.robotCentric
+        .withVelocityX(vx)
+        .withVelocityY(vy)
+        .withRotationalRate(rotationRate);
+    periodicIO.masterRequest = periodicIO.robotCentric;
+}
+```
+
+---
+
+## Part 3: DrivetrainCommands
+
+Create `DrivetrainCommands.java` in `commands/`. This is pretty much the same as the minibot's `DrivetrainCommands`.
+
+You should be able to figure this out yourself.
+
+Scale your velocity inputs by the robot's max speed (e.g. `TunerConstants.kSpeedAt12Volts`). For field-relative drive, flip the sign when on the Red alliance so the driver's "forward" always matches their perspective.
+
+---
+
+## Part 4: RobotContainer
+
+Instantiate `SwerveDrive` with the constants from `TunerConstants`:
+
+```java
+final SwerveDrive swervedrive = new SwerveDrive(
+    TunerConstants.DrivetrainConstants,
+    TunerConstants.FrontLeft,
+    TunerConstants.FrontRight,
+    TunerConstants.BackLeft,
+    TunerConstants.BackRight
+);
+```
+
+Register it's default command.
+
+---
+
+## Checklist Before Moving On
+
+- [ ] `TunerConstants.java` is generated and in your `constants/` folder
+- [ ] `SwerveDrive` extends `TunerConstants.TunerSwerveDrivetrain` and implements `PeriodicSubsystem`
+- [ ] `PeriodicIO` has a master request, a `FieldCentric` request, and a `RobotCentric` request
+- [ ] `registerTelemetry` is called in the constructor
+- [ ] Pose and module states are logged in AdvantageScope
+- [ ] `writePeriodicOutputs` calls `setControl(periodicIO.masterRequest)`
+- [ ] Field-relative and robot-relative drive methods work correctly
+- [ ] `DrivetrainCommands` wraps both drive methods with `DoubleSupplier` parameters
+- [ ] `RobotContainer` instantiates the drivetrain and sets the default command
+- [ ] Robot drives correctly in field-relative mode from a joystick
+
+**Tell a lead when you're done so they can verify the robot drives correctly.**

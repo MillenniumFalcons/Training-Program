@@ -1,4 +1,4 @@
-# Step 3: Turn the Wheel 90 Degrees
+# Step 3: PID Control
 *Timeline ~1 week.*
 
 Now it's time to learn about PID control. In this step, you'll program one of the minibot's wheels to turn to a target position. You'll implement it **twice** — first using WPILib's `PIDController` class to understand how PID works, then using the SparkMax's onboard PID controller, which is how it's done in practice.
@@ -11,13 +11,13 @@ Now it's time to learn about PID control. In this step, you'll program one of th
 
 A PID controller is an algorithm that drives a system to a target state (called the **setpoint**) by continuously measuring the current state and adjusting the output to close the gap.
 
-The formula is: **output = kP × e(t) + kI × ∫e(t) + kD × e'(t)**
+The formula is: **output = kP × e(t) + kI × ∫e(t) + kD × e'(t).**
 
 Where **e(t)** is the error — the difference between the setpoint and the current measurement. Here's what each term does:
 
 - **kP (Proportional):** The main driver. Output is proportional to the error — the further you are from the setpoint, the harder the motor pushes. As you get close, output shrinks.
-- **kD (Derivative):** Dampens oscillations. It looks at how fast the error is changing — if you're approaching the setpoint quickly, it starts reducing the output early to prevent overshooting.
-- **kI (Integral):** Corrects for steady-state error that P alone can't fix. In practice, leave this at 0 unless you have a specific reason — it often causes more problems than it solves.
+- **kD (Derivative):** Dampens oscillations. The derivative, e'(t) is how fast the error is changing — if you're approaching the setpoint quickly, it starts reducing the output early to prevent overshooting.
+- **kI (Integral):** Corrects for steady-state error that P alone can't fix. The term ∫e(t) is the area under the error graph, so it accumulates over time if the mechanism is not at the setpoint. In practice, leave this at 0 unless you have a specific reason — it often causes more problems than it solves.
 
 ### A worked example
 

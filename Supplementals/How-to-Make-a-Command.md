@@ -10,7 +10,8 @@
      4. `end(Boolean interrupted)`
          - this defines what to do when the command ends. if you want different end behavior when the command is interrupted by another command, you can define that here using the parameter 
     once those methods are done, you simply make a new object with this class, and that object can be run like any other command. 
-## 2. the fast way
+
+## 2. The fast way
 You can also use the `Commands` helper class to create the commands you want quicky. *The `Commands` class contains helper methods that all return commands.* Here are some of the most common methods
 - `Commands.run(Runnable toRun, Subsystem... requirements)`
 
@@ -19,7 +20,7 @@ You can also use the `Commands` helper class to create the commands you want qui
 - `Commands.Sequence(Command... commands)`
      - this takes a list of commands and runs them in sequence, one after the other
      - you can achieve the same affect by appending `.andThen(Command... commands)` to the end of a command
- - `Commands.paralell(Command... commands)` 
+ - `Commands.parallel(Command... commands)` 
      - this takes a list of commands and runs them in parallel, at the same time 
 	 - you can achieve the same effect by appending `.alongWith(Command... commands)` to the end of a command
 To explore the other factories, you can look at [this page](https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/Commands.html) in the documentation
