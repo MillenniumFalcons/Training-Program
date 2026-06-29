@@ -133,7 +133,7 @@ final SwerveDrive swervedrive = new SwerveDrive(
 );
 ```
 
-Register it's default command.
+Register the default command.
 
 ---
 
