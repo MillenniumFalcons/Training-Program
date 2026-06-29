@@ -1,4 +1,4 @@
-# TalonFX Subsystem
+# Step 7: TalonFX Subsystem
 
 In this step, you will learn how to use TalonFX subsystems in your robot code. You will also learn how to tune the TalonFX controllers using the Phoenix Tuner. This is what you we use to code the actual robot during the season. You will be programming the intake of Droopy McCool, the 2024 robot, which consist of the Intake and Wrist subsystems. The Intake is the rollers that grab the note, and the Wrist is the mechanism that the rollers are attached to which slaps down onto the ground. 
 
@@ -7,6 +7,8 @@ In this step, you will learn how to use TalonFX subsystems in your robot code. Y
 ---
 
 ## Background: TalonFXSubsystem
+
+Read through [*Control Requests*](https://v6.docs.ctr-electronics.com/en/stable/docs/api-reference/api-usage/control-requests.html) to learn how to run the motors. The TalonFXSubsystem class already handles most of this for you, but you should still know how to do it yourself.
 
 `TalonFXSubsystem` (in `team3647/lib/`) is an abstract base class that wraps one or more TalonFX motors and handles the periodic loop for you:
 
@@ -17,9 +19,12 @@ Your subsystem extends it and calls protected helpers like `setOpenloop`, `setPo
 
 > **Before writing any code:** read through `TalonFXSubsystem.java` in full. Understand what `positionConversion` and `velocityConversion` do, and why the position helpers divide by `positionConversion` before sending the value to the motor.
 
+
 ---
 
 ## Background: Motion Magic
+
+Read through [TalonFX Control Modes](<Supplementals\TalonFX Control Modes.md>) in the Supplementals folder to understand the different control modes.
 
 Motion Magic is CTRE's built-in motion profiling. Instead of jumping straight to a setpoint (which causes a large current spike and jerky motion), it generates a smooth velocity profile and tracks it with a PID loop.
 
@@ -27,6 +32,7 @@ You configure it with:
 - **kP, kI, kD** — PID gains for following the profile
 - **kS** — static feedforward (voltage to overcome stiction)
 - **kV, kA** — velocity and acceleration feedforward
+- **kG** - gravity feedforward for mechanisms like pivots and elevators
 - **MotionMagicCruiseVelocity** — peak velocity during the move
 - **MotionMagicAcceleration** — how fast to ramp up and down
 - **MotionMagicExpo_kV, MotionMagicExpo_kA** — used by `MotionMagicExpoVoltage`, which gives smoother low-speed behavior by using an exponential profile instead of a trapezoid. These constants are used to generate the trajectory, not to control the motor. **You should start with high values when tuning these unlike the other constants, because it puts a more restrictive limit on the trajectory.**
