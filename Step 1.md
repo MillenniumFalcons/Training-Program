@@ -30,7 +30,7 @@ It is okay if you don't fully grasp everything, it will make sense once you fini
 
 ---
 
-## Part 2: Mini Project
+## Part 2: Exercise
 You now have a good idea of the basics of Java, so it's time to do a mini project. This will reinforce what you've already learned and introduce you to the rest of the main concepts you need to start programming a real robot.
 
 You'll build a simple bank account simulator. Use this online compiler to write and run your code: [https://onecompiler.com/java](https://onecompiler.com/java) — it supports multiple files, so keep your classes in separate files. 

@@ -16,7 +16,7 @@ Before you start coding open the [WPILib guide to command based programming](htt
 
 If you ever get confused, please ask me or an assistant head for help. If we're not available Claude, Gemini, and ChatGPT are all excellent teachers too.
 
-**IMPORTANT:** Don't copy paste anything into your code unless the instructions explicitly say so; you need to type everything out yourself. This is for you to develop experience with programming.
+**IMPORTANT:** Don't copy paste anything into your code unless the instructions explicitly say so; you need to type everything out yourself. This is for you to develop experience with programming. 
 
 
 ## Part 1: DrivetrainConstants
@@ -95,9 +95,8 @@ Do this for both motors.
 
 Create a `public void drive(double forward, double rotation)` method. This is what commands will call to move the robot.
 
-Inside, use `DifferentialDrive.arcadeDriveIK(forward, rotation, false)` to convert the forward/rotation inputs into individual left and right wheel speeds. This returns a `WheelSpeeds` object with `.left` and `.right` fields — store those in `periodicIO`, and set `periodicIO.controlType` to `ControlType.kDutyCycle`.
-
-> **Tip:** If the robot spins when you push forward (or vice versa), try negating the `rotation` argument passed into `arcadeDriveIK`. The joystick axis may be reversed compared to what the method expects.
+Inside, use `DifferentialDrive.arcadeDriveIK(forward, rotation, false)` to convert the forward/rotation inputs into individual left and right wheel speeds. This returns a `WheelSpeeds` object with `.left` and `.right` fields — store those in `periodicIO`, and set `periodicIO.controlType` to `ControlType.kDutyCycle`. 
+- If you want a fun challenge, figure out the math yourself and implement it.
 
 ### 2.6 — Add `getName()`
 
