@@ -4,7 +4,7 @@
 This is a link to [W3Schools](https://www.w3schools.com/java/default.asp) which is course for learning Java. At some point you will need to learn everything from the sections "Java Turorial", "Java Methods", and "Java Classes". 
 
 Good news: you don't need to go through all of it.
-This Step will not teach you everything you need to know about Java, it is meant to develop the foundations so you can get started coding. Throughout this training program, if you are unsure of a java concept, you should reference W3Schools, or look it up.
+This Step will not teach you everything you need to know about Java, it is meant to develop the foundations so you can get started coding. The idea is that you learn as you go. Throughout this training program, if you are unsure of a java concept, you should reference W3Schools, or look it up.
 
 If you already know Java you can skip to Step 2. If you already know a similar language like C++ or Python, this step shouldn't take too long; you can breeze through it and move on to the next step.
 
@@ -19,7 +19,7 @@ You do not need to read through every line, you can jump around as you desire. T
 
 Once you're done, if you're not bored yet, I recommend going through "Java Data Types" and "Java Operators" and doing the Code Challenges too. This is not strictly required at this point, but you will need to learn it eventually.
 
-If you feel like you haven't gotten the hang of it, play around with java variables here: https://onecompiler.com/java until you're confident. You need to change the tab to I/O on the right side to see what the printed outputs.
+If you feel like you haven't gotten the hang of it, play around with java variables here: https://onecompiler.com/java until you're confident. You need to change the tab to I/O on the right side to see the printed outputs.
 
 ### 1.2 - OOP: Classes & Methods
 Skim through all the pages under "Java Methods" then do the Code Challenge. 

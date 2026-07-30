@@ -83,7 +83,7 @@ You don't need a separate sensor to detect when the intake grabs a Note. When th
 Trigger intakeCurrentTrigger = new Trigger(() -> intake.getMasterCurrent() > 30).debounce(0.1);
 ```
 
-`.debounce(0.1)` means the trigger must be true for 100 ms continuously before it fires — this filters out brief noise spikes.
+`.debounce(0.1)` means the trigger must be true for 100 ms continuously before it fires — this filters out the spin-up current spike.
 
 Use these triggers in `RobotContainer` to automatically start handoff when a Note is detected, rather than requiring the driver to press a button.
 
@@ -132,12 +132,10 @@ Implement these Superstructure commands:
 **`endIntake()`** — stows the wrist, stops the intake.
 
 **`transferNote(Trigger kickerCurrentTrigger)`** — the full handoff sequence:
-1. Set state to `HANDOFF`
-2. Stop intake
-3. Move pivot and wrist to the handoff angle (parallel, wait for both)
-4. Run intake + kicker together until the `kickerCurrentTrigger` fires (note reached kicker)
-5. Reverse-kick slightly to seat the note
-6. Set state to `NOTE_PREP`
+1. Stop intake
+2. Move pivot and wrist to the handoff angle (parallel, wait for both)
+3. Run intake + kicker together
+4. Reverse-kick slightly to seat the note
 
 Add current triggers to `RobotContainer`. Wire up:
 - Right bumper held → `intake()`; released → `endIntake()`
