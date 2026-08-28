@@ -60,7 +60,7 @@ java
 
 - Go into the java folder of your project through vscode or through file explorer
 - Inside of the `java` folder, create a folder called `team 3647`
-- Inside of the `team3647` folder you just made, create a folder called `frcYEAR` (or whatever year it is) and `lib`
+- Inside of the `team3647` folder you just made, create a folder called `frcYEAR` (e.g. frc2026 or whatever year it is) and `lib`
 - Inside of `frcYEAR`, add
 	- autonomous
 	- commands
@@ -69,7 +69,6 @@ java
  	- constants 
 - Move `Main.java`, `Robot.java`, and `RobotContainer.java` into team3647/frcYEAR/robot
 - Delete the frc folder
-- remove all import statements from ```RobotContainer.java```
 - return null in getAutonomousCommand() in ```RobotContainer.java```
 
 ***Make appropriate edits to the package statements at the top of these files***

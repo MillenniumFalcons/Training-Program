@@ -7,6 +7,8 @@ In Step 4 you set up odometry, which tracks position by counting wheel rotations
 
 In this step, you'll add **AprilTag vision** using the Limelight to get direct position measurements from the field, then fuse them with your odometry using a Kalman Filter to get a pose estimate that's both continuous and accurate.
 
+https://docs.wpilib.org/en/stable/docs/software/vision-processing/apriltag/apriltag-intro.html this is a good read to learn about how the cameras detect april tags.
+
 > If you get stuck, ask a lead. There are no dumb questions.
 
 ---

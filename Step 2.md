@@ -1,7 +1,7 @@
 # Step 2: Minibot Drive
 *Timeline ~2 weeks.*
 
-> **Before you start:** Make sure you've completed Step 1. Follow this guide: [Intro to WPILib](Supplementals/Intro-to-Wpilib.md) to install WPILib VSCode and create your mini-bot project. If you get stuck at any point, you can reference the finished mini-bot project [here](https://github.com/ChrisC12345/mini-bot) — but try to figure it out yourself first. 
+**Before you start:** Make sure you've completed Step 1. Follow this guide: [Intro to WPILib](Supplementals/Intro-to-Wpilib.md) to install WPILib VSCode and create your mini-bot project. If you get stuck at any point, you can reference the finished mini-bot project [here](https://github.com/ChrisC12345/mini-bot) — but try to figure it out yourself first. Ask a lead to show you the physical minibot.
 
 ## Overview
 
@@ -65,9 +65,9 @@ If VS Code underlines the interface name in red, hover over it and select **"Add
 ### 2.2 — Add `PeriodicIO`
 
 Inside your `Drivetrain` class, create a `public static` inner class called `PeriodicIO`. This is a simple container that holds the values you want to send to each motor each loop. IO stands for Input/Output. Give it three fields:
-- `double leftOutput` — speed for the left side (-1.0 to 1.0)
-- `double rightOutput` — speed for the right side (-1.0 to 1.0)
-- `ControlType controlType` — tells the SparkMax how to interpret the output values. Default this to `ControlType.kDutyCycle`, which means percentage of full power.
+- `double leftOutput` — duty cycle for the left side (-1.0 to 1.0)
+- `double rightOutput` — duty cycle for the right side (-1.0 to 1.0)
+- `ControlType controlType` — tells the SparkMax how to interpret the output values. Default this to `ControlType.kDutyCycle`, which means percentage of full voltage — this is essentially just how strong the motor runs.
 
 Then create an instance of `PeriodicIO` as a private field in `Drivetrain`.
 

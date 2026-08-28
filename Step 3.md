@@ -74,11 +74,28 @@ Add a `setAngle(double degrees)` method that:
 
 ### In `DrivetrainCommands.java`
 
-Add a `turnWheel()` command that turns the wheel 90 degrees. Use the full command class syntax (not `Commands.run`) so you can use `initialize()`, `execute()`, and `isFinished()` separately:
+Add a `turnWheel()` command that turns the wheel 90 degrees. Use a `FunctionalCommand` (not `Commands.run`) so you can define `initialize()`, `execute()`, and `isFinished()` as separate lambdas:
 
-- In `initialize()`: store the target angle (current wheel position + 90 degrees, converted to motor rotations) as a local variable.
-- In `execute()`: call `drivetrain.setAngle(target)` each loop.
-- In `isFinished()`: return `true` when the motor position is within a small tolerance of the target (e.g., ±0.05 rotations).
+```java
+public Command turnWheel() {
+    double[] target = new double[1];
+    return new FunctionalCommand(
+        () -> target[0] = ..., // initialize
+        () -> drivetrain.setAngle(target[0]), // execute
+        interrupted -> {}, // end
+        () -> ..., // isFinished
+        drivetrain
+    );
+}
+```
+
+- **initialize:** store the target angle (current wheel position + 90 degrees, converted to motor rotations) into `target[0]`.
+- **execute:** call `drivetrain.setAngle(target[0])` each loop.
+- **end:** leave empty — nothing needs to happen when the command finishes.
+- **isFinished:** return `true` when the motor position is within a small tolerance of `target[0]` (e.g., ±0.05 rotations).
+- Pass `drivetrain` as the requirement so the command scheduler knows it uses the drivetrain subsystem.
+
+> **Why a `double[]` instead of a plain `double` variable?** Lambdas can only capture variables that are effectively final, so a normal local variable can't be reassigned inside the `initialize` lambda. Wrapping it in a single-element array gives you a final *reference* whose contents you can still mutate.
 
 > **Why store the target in `initialize()` and not `execute()`?** `initialize()` runs once when the command starts. If you calculated the target inside `execute()`, it would use the motor's current (moving) position as the new base every loop — the target would keep shifting and the wheel would never stop.
 
